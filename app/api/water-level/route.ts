@@ -53,7 +53,6 @@ export async function GET(req: NextRequest) {
   const stationsData = await stationsRes.json();
   const stations: SykeStation[] = stationsData.value ?? [];
   console.log('SYKE stations fetched:', stations.length);
-
   const nearest = stations
     .filter((s) => s.KoordLat && s.KoordLong)
     .map((s) => ({
@@ -64,6 +63,7 @@ export async function GET(req: NextRequest) {
     .map((s) => ({ ...s, distKm: haversineKm(lat, lon, s.lat, s.lon) }))
     .sort((a, b) => a.distKm - b.distKm)
     .slice(0, 3);
+  console.log('Nearest:', nearest.map(s => `${s.Nimi.trim()} ${s.distKm}km lat=${s.lat} lon=${s.lon}`));
 
   if (nearest.length === 0) {
     return NextResponse.json({ stations: [] });

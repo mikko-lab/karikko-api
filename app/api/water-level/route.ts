@@ -43,11 +43,14 @@ export async function GET(req: NextRequest) {
   );
 
   if (!stationsRes.ok) {
-    return NextResponse.json({ error: 'SYKE-asemien haku epäonnistui' }, { status: 502 });
+    const text = await stationsRes.text();
+    console.error('SYKE error', stationsRes.status, text.slice(0, 200));
+    return NextResponse.json({ error: 'SYKE-asemien haku epäonnistui', status: stationsRes.status }, { status: 502 });
   }
 
   const stationsData = await stationsRes.json();
   const stations: SykeStation[] = stationsData.value ?? [];
+  console.log('SYKE stations fetched:', stations.length);
 
   const nearest = stations
     .filter((s) => s.KoordLat && s.KoordLong)

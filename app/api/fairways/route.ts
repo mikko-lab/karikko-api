@@ -16,19 +16,24 @@ export async function GET(req: NextRequest) {
 
   const bbox = `${lon - radiusDeg},${lat - radiusDeg},${lon + radiusDeg},${lat + radiusDeg}`;
 
-  const [areasRes, marksRes] = await Promise.all([
+  const [areasRes, linesRes, marksRes] = await Promise.all([
     fetch(
-      `${VAYLA_BASE}/vesivaylatiedot:vaylaalueet_uusi/items?bbox=${bbox}&limit=50&f=json`,
+      `${VAYLA_BASE}/vesivaylatiedot:vaylaalueet_uusi/items?bbox=${bbox}&limit=100&f=json`,
       { next: { revalidate: 86400 } }
     ),
     fetch(
-      `${VAYLA_BASE}/vesivaylatiedot:turvalaitteet_uusi/items?bbox=${bbox}&limit=50&f=json`,
+      `${VAYLA_BASE}/vesivaylatiedot:navigointilinjat_uusi/items?bbox=${bbox}&limit=100&f=json`,
+      { next: { revalidate: 86400 } }
+    ),
+    fetch(
+      `${VAYLA_BASE}/vesivaylatiedot:turvalaitteet_uusi/items?bbox=${bbox}&limit=100&f=json`,
       { next: { revalidate: 86400 } }
     ),
   ]);
 
-  const [areasData, marksData] = await Promise.all([
+  const [areasData, linesData, marksData] = await Promise.all([
     areasRes.ok ? areasRes.json() : { features: [] },
+    linesRes.ok ? linesRes.json() : { features: [] },
     marksRes.ok ? marksRes.json() : { features: [] },
   ]);
 
@@ -43,6 +48,14 @@ export async function GET(req: NextRequest) {
     geometry: f.geometry,
   }));
 
+  const lines = (linesData.features ?? []).map((f: any) => ({
+    id: f.id,
+    name: f.properties?.vaylan_nimi ?? null,
+    designDepthM: f.properties?.mitoitussyvays ?? null,
+    dredgedDepthM: f.properties?.haraussyvyys ?? null,
+    geometry: f.geometry,
+  }));
+
   const marks = (marksData.features ?? []).map((f: any) => ({
     id: f.id,
     name: f.properties?.nimifi ?? f.properties?.nimisv ?? null,
@@ -52,5 +65,5 @@ export async function GET(req: NextRequest) {
     geometry: f.geometry,
   }));
 
-  return NextResponse.json({ fairways, marks });
+  return NextResponse.json({ fairways, lines, marks });
 }

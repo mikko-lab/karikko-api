@@ -5,15 +5,16 @@ const SYKE_BASE = 'https://rajapinnat.ymparisto.fi/api/Hydrologiarajapinta/1.2/o
 interface SykeStation {
   Paikka_Id: number;
   Nimi: string;
-  Latitude: number;
-  Longitude: number;
+  KoordLat: string;
+  KoordLong: string;
 }
 
-interface SykeReading {
-  Paikka_Id: number;
-  Aika: string;
-  Arvo: number;
-  Lippu_id: number | null;
+function ddmmssToDecimal(ddmmss: string): number {
+  const s = ddmmss.padStart(6, '0');
+  const deg = parseInt(s.slice(0, 2), 10);
+  const min = parseInt(s.slice(2, 4), 10);
+  const sec = parseInt(s.slice(4, 6), 10);
+  return deg + min / 60 + sec / 3600;
 }
 
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -35,16 +36,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'lat ja lon vaaditaan' }, { status: 400 });
   }
 
-  const margin = 0.5;
-  const filter = [
-    `Latitude gt ${lat - margin}`,
-    `Latitude lt ${lat + margin}`,
-    `Longitude gt ${lon - margin}`,
-    `Longitude lt ${lon + margin}`,
-  ].join(' and ');
-
+  // Fetch all water level stations (Suure_Id=7 = vedenkorkeus)
   const stationsRes = await fetch(
-    `${SYKE_BASE}/Paikka?$filter=${encodeURIComponent(filter)}&$select=Paikka_Id,Nimi,Latitude,Longitude&$top=100`,
+    `${SYKE_BASE}/Paikka?$filter=Suure_Id%20eq%207&$select=Paikka_Id,Nimi,KoordLat,KoordLong&$top=500`,
     { next: { revalidate: 3600 } }
   );
 
@@ -55,30 +49,36 @@ export async function GET(req: NextRequest) {
   const stationsData = await stationsRes.json();
   const stations: SykeStation[] = stationsData.value ?? [];
 
-  if (stations.length === 0) {
-    return NextResponse.json({ stations: [] });
-  }
-
   const nearest = stations
-    .map((s) => ({ ...s, distKm: haversineKm(lat, lon, s.Latitude, s.Longitude) }))
+    .filter((s) => s.KoordLat && s.KoordLong)
+    .map((s) => ({
+      ...s,
+      lat: ddmmssToDecimal(s.KoordLat),
+      lon: ddmmssToDecimal(s.KoordLong),
+    }))
+    .map((s) => ({ ...s, distKm: haversineKm(lat, lon, s.lat, s.lon) }))
     .sort((a, b) => a.distKm - b.distKm)
     .slice(0, 3);
+
+  if (nearest.length === 0) {
+    return NextResponse.json({ stations: [] });
+  }
 
   const results = await Promise.all(
     nearest.map(async (station) => {
       const readingRes = await fetch(
-        `${SYKE_BASE}/Vedenkorkeus?$filter=${encodeURIComponent(`Paikka_Id eq ${station.Paikka_Id}`)}&$orderby=Aika desc&$top=1`,
+        `${SYKE_BASE}/Vedenkorkeus?$filter=Paikka_Id%20eq%20${station.Paikka_Id}&$orderby=Aika%20desc&$top=1`,
         { next: { revalidate: 600 } }
       );
       if (!readingRes.ok) return null;
       const data = await readingRes.json();
-      const reading: SykeReading | undefined = data.value?.[0];
+      const reading = data.value?.[0];
       if (!reading) return null;
       return {
         stationId: station.Paikka_Id,
-        name: station.Nimi,
-        latitude: station.Latitude,
-        longitude: station.Longitude,
+        name: station.Nimi.trim(),
+        latitude: station.lat,
+        longitude: station.lon,
         distKm: Math.round(station.distKm * 10) / 10,
         levelCm: reading.Arvo,
         measuredAt: reading.Aika,
@@ -87,7 +87,5 @@ export async function GET(req: NextRequest) {
     })
   );
 
-  return NextResponse.json({
-    stations: results.filter(Boolean),
-  });
+  return NextResponse.json({ stations: results.filter(Boolean) });
 }

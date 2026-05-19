@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
   const stationsData = await stationsRes.json();
   const stations: SykeStation[] = stationsData.value ?? [];
   console.log('SYKE stations fetched:', stations.length);
-  const nearest = stations
+  const candidates = stations
     .filter((s) => s.KoordLat && s.KoordLong)
     .map((s) => ({
       ...s,
@@ -62,15 +62,18 @@ export async function GET(req: NextRequest) {
     }))
     .map((s) => ({ ...s, distKm: haversineKm(lat, lon, s.lat, s.lon) }))
     .sort((a, b) => a.distKm - b.distKm)
-    .slice(0, 3);
-  console.log('Nearest:', nearest.map(s => `${s.Nimi.trim()} ${s.distKm}km lat=${s.lat} lon=${s.lon}`));
+    .slice(0, 10);
+  console.log('Candidates:', candidates.map(s => `${s.Nimi.trim()} ${s.distKm.toFixed(1)}km`));
 
-  if (nearest.length === 0) {
+  if (candidates.length === 0) {
     return NextResponse.json({ stations: [] });
   }
 
-  const results = await Promise.all(
-    nearest.map(async (station) => {
+  const maxAgeMs = 72 * 60 * 60 * 1000; // 72h
+  const now = Date.now();
+
+  const readings = await Promise.all(
+    candidates.map(async (station) => {
       const readingRes = await fetch(
         `${SYKE_BASE}/Vedenkorkeus?$filter=Paikka_Id%20eq%20${station.Paikka_Id}&$orderby=Aika%20desc&$top=1`,
         { next: { revalidate: 600 } }
@@ -79,18 +82,24 @@ export async function GET(req: NextRequest) {
       const data = await readingRes.json();
       const reading = data.value?.[0];
       if (!reading) return null;
+      const levelCm: number = reading.Arvo;
+      const measuredAt: string = reading.Aika;
+      // Filter out clearly bad data: stale (>72h) or physically implausible values
+      if (now - new Date(measuredAt).getTime() > maxAgeMs) return null;
+      if (levelCm < 0 || levelCm > 2000) return null;
       return {
         stationId: station.Paikka_Id,
         name: station.Nimi.trim(),
         latitude: station.lat,
         longitude: station.lon,
         distKm: Math.round(station.distKm * 10) / 10,
-        levelCm: reading.Arvo,
-        measuredAt: reading.Aika,
+        levelCm,
+        measuredAt,
         qualityFlag: reading.Lippu_id,
       };
     })
   );
 
-  return NextResponse.json({ stations: results.filter(Boolean) });
+  const valid = readings.filter(Boolean).slice(0, 3);
+  return NextResponse.json({ stations: valid });
 }

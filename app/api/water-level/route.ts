@@ -38,9 +38,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'lat ja lon vaaditaan' }, { status: 400 });
   }
 
-  // Fetch all water level stations (Suure_Id=7 = vedenkorkeus)
+  // Fetch all water level stations (Suure_Id=1 = vedenkorkeus, active network)
   const stationsRes = await fetch(
-    `${SYKE_BASE}/Paikka?$filter=Suure_Id%20eq%207&$select=Paikka_Id,Nimi,KoordLat,KoordLong&$top=500`,
+    `${SYKE_BASE}/Paikka?$filter=Suure_Id%20eq%201&$select=Paikka_Id,Nimi,KoordLat,KoordLong&$top=1000`,
     { next: { revalidate: 3600 } }
   );
 

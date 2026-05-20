@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
 
   const sql = getDb();
   const rows = await sql`
-    SELECT id, latitude, longitude, depth_cm, note, reported_at, confirmed_count, status
+    SELECT id, latitude, longitude, depth_cm, note, reported_at, confirmed_count, status, photo_url
     FROM hazards
     WHERE latitude  BETWEEN ${lat - dLat} AND ${lat + dLat}
       AND longitude BETWEEN ${lon - dLon} AND ${lon + dLon}
@@ -97,11 +97,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { latitude, longitude, depth_cm, note } = parsed.data;
+  const { latitude, longitude, depth_cm, note, photo_url } = parsed.data;
   const sql = getDb();
   const [row] = await sql`
-    INSERT INTO hazards (latitude, longitude, depth_cm, note, created_at)
-    VALUES (${latitude}, ${longitude}, ${depth_cm ?? null}, ${note ?? null}, ${Date.now()})
+    INSERT INTO hazards (latitude, longitude, depth_cm, note, photo_url, created_at)
+    VALUES (${latitude}, ${longitude}, ${depth_cm ?? null}, ${note ?? null}, ${photo_url ?? null}, ${Date.now()})
     RETURNING id
   `;
 

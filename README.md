@@ -16,8 +16,14 @@ POST /api/v1/hazards/:id/confirm
 
 POST-body:
 ```json
-{ "latitude": 61.5, "longitude": 28.0, "depth_cm": 40, "note": "Kivi" }
+{ "latitude": 61.5, "longitude": 28.0, "depth_cm": 40, "note": "Kivi", "photo_url": "https://..." }
 ```
+
+Kuvan upload ensin:
+```
+POST /api/v1/hazards/photo   (multipart/form-data, kenttä: photo)
+```
+Palauttaa `{ url }` — lisää URL hazard-POSTin `photo_url`-kenttään.
 
 ### Vedenkorkeus
 
@@ -86,6 +92,7 @@ EMODnet-syvyys metreinä. Kattaa merialueet ja rannikon — ei sisävesiä.
 
 - Next.js 15 App Router, TypeScript strict
 - Neon PostgreSQL (serverless), `@neondatabase/serverless`
+- Vercel Blob (kuvasäilö, EU/Frankfurt)
 - Zod v4 validointiin, Vitest + MSW testaukseen
 - Vercel (Edge Runtime chart-tileille, Node muille)
 
@@ -103,6 +110,9 @@ ALLOWED_ORIGINS=https://karikko.fi,https://www.karikko.fi
 
 # Valinnainen — Cloudflare Turnstile web-frontendille
 CLOUDFLARE_TURNSTILE_SECRET_KEY=...
+
+# Vercel Blob — kuvasäilö matalikkomerkintöjen valokuville
+BLOB_READ_WRITE_TOKEN=...
 ```
 
 Mobiilisovellus ohittaa Turnstilen automaattisesti (`X-App-Platform: karikko-mobile`).

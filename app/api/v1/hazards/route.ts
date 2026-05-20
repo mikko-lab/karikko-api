@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
 
   console.log(JSON.stringify({ event: 'hazards_get', lat, lon, radius_m, count: rows.length }));
   return NextResponse.json(rows, {
-    headers: { 'X-Attribution': 'Karikko — käyttäjien merkitsemät matalakot' },
+    headers: { 'X-Attribution': 'Karikko - kayttajien merkitsemat matalikot' },
   });
 }
 

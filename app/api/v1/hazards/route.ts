@@ -5,6 +5,7 @@ import { latLonSchema, hazardPostSchema } from '@/lib/schemas';
 import { metersToDegreesLat, metersToDegreesLon } from '@/lib/geo';
 import { getRatelimit, getClientIp } from '@/lib/ratelimit';
 import { isOriginAllowed } from '@/lib/origin';
+import { isTurnstileEnabled, isMobileRequest, verifyTurnstile } from '@/lib/turnstile';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,6 +75,18 @@ export async function POST(req: NextRequest) {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON', code: 'INVALID_BODY' }, { status: 400 });
+  }
+
+  if (isTurnstileEnabled() && !isMobileRequest(req)) {
+    const token = (body as Record<string, unknown>)?.cf_turnstile_token;
+    if (typeof token !== 'string' || !token) {
+      return NextResponse.json({ error: 'Turnstile token puuttuu', code: 'TURNSTILE_REQUIRED' }, { status: 400 });
+    }
+    const ok = await verifyTurnstile(token, getClientIp(req));
+    if (!ok) {
+      console.log(JSON.stringify({ event: 'turnstile_failed', ip: getClientIp(req) }));
+      return NextResponse.json({ error: 'Turnstile-vahvistus epäonnistui', code: 'TURNSTILE_FAILED' }, { status: 403 });
+    }
   }
 
   const parsed = hazardPostSchema.safeParse(body);

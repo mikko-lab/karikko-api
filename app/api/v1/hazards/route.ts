@@ -8,7 +8,6 @@ import { isOriginAllowed } from '@/lib/origin';
 
 export const dynamic = 'force-dynamic';
 
-const USER_AGENT = 'Karikko/1.0 (kontakti@example.fi)';
 
 const getQuerySchema = latLonSchema.extend({
   radius_m: z.coerce.number().min(1).max(50_000).default(5_000),

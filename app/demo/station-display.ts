@@ -18,11 +18,9 @@ export const STATION_DISPLAY_OVERRIDES: Record<
   number,
   { lat: number; lon: number; note?: string }
 > = {
-  // Lauritsala (Paikka_Id 1900) — sensori Saimaan kanavan suulla, siirretty
-  // noin 6 km pohjoiseen Suuri-Saimaan avovedelle.
-  1900: { lat: 61.135, lon: 28.255, note: 'Suuri-Saimaa, Lauritsalan pohjoispuoli' },
+  // Lauritsala (1900) — sensori kanavan suulla, siirretty Suuri-Saimaan avovedelle
+  1900: { lat: 61.22, lon: 28.20, note: 'Suuri-Saimaa' },
 
-  // TODO: lisää tarvittaessa muut asemat alle. Voit tarkistaa kunkin
-  // valitsemalla aseman demossa ja katsomalla mihin marker osuu —
-  // jos vesialueelle, ei tarvitse koskea.
+  // Oravi (1889) — sensori Oravin kanavan luukulla, siirretty Haukivedelle
+  1889: { lat: 62.22, lon: 28.57, note: 'Haukivesi' },
 };

@@ -19,7 +19,21 @@ export default function DemoPage() {
     end: referenceLevels.historyEnd,
   };
 
+  // Keskimääräinen havaintomäärä per asema — kertoo footnotessa vertailudatan
+  // syvyyden (~4150 obs/station) ilman omaa "engineering quality" -blokkia.
+  const sampleCounts = referenceLevels.stations.map((s) => s.sampleCount);
+  const avgSampleCount =
+    sampleCounts.length > 0
+      ? Math.round(
+          sampleCounts.reduce((a, b) => a + b, 0) / sampleCounts.length,
+        )
+      : 0;
+
   return (
-    <DemoApp stations={stations} referencePeriod={referencePeriod} />
+    <DemoApp
+      stations={stations}
+      referencePeriod={referencePeriod}
+      avgSampleCount={avgSampleCount}
+    />
   );
 }

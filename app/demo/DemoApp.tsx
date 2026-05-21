@@ -45,6 +45,7 @@ export interface ErrorPayload {
 interface DemoAppProps {
   stations: DemoStation[];
   referencePeriod: { start: string; end: string };
+  avgSampleCount: number;
 }
 
 async function fetchDepthRealtime(
@@ -60,7 +61,7 @@ async function fetchDepthRealtime(
   return body.data;
 }
 
-export default function DemoApp({ stations, referencePeriod }: DemoAppProps) {
+export default function DemoApp({ stations, referencePeriod, avgSampleCount }: DemoAppProps) {
   // Per-asema anomalia, key = stationId
   const [anomalies, setAnomalies] = useState<
     Map<number, DepthRealtimeData | ErrorPayload>
@@ -149,6 +150,7 @@ export default function DemoApp({ stations, referencePeriod }: DemoAppProps) {
           station={selectedStation}
           data={selectedAnomaly}
           referencePeriod={referencePeriod}
+          avgSampleCount={avgSampleCount}
           onStationSelect={handleStationSelect}
         />
       </div>

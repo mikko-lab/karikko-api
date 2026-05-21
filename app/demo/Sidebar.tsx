@@ -14,6 +14,7 @@ interface SidebarProps {
   station: DemoStation | null;
   data: DepthRealtimeData | ErrorPayload | null;
   referencePeriod: { start: string; end: string };
+  avgSampleCount: number;
   onStationSelect: (stationId: number) => void;
 }
 
@@ -241,6 +242,7 @@ export default function Sidebar({
   station,
   data,
   referencePeriod,
+  avgSampleCount,
   onStationSelect,
 }: SidebarProps) {
   const { t, lang } = useLang();
@@ -278,14 +280,6 @@ export default function Sidebar({
         </h1>
         <p className="intro__lede">{t('intro')}</p>
       </div>
-
-      {/* Station list — navigator, always visible */}
-      <StationList
-        stations={stations}
-        anomalies={anomalies}
-        selectedId={selectedId}
-        onSelect={onStationSelect}
-      />
 
       <hr className="divider" />
 
@@ -372,6 +366,14 @@ export default function Sidebar({
         </div>
       )}
 
+      {/* Station list — navigator for other stations */}
+      <StationList
+        stations={stations}
+        anomalies={anomalies}
+        selectedId={selectedId}
+        onSelect={onStationSelect}
+      />
+
       {/* Error states */}
       {errorData && (
         <div className="anomaly" data-level="below_p10">
@@ -398,6 +400,13 @@ export default function Sidebar({
         <div className="sources__heading">{t('sourcesHeading')}</div>
         <div>{t('sourceSyke')}</div>
         <div>{t('sourceTraficom')}</div>
+        <div>
+          {t('dataFootnote')(
+            new Date(referencePeriod.start).getFullYear(),
+            new Date(referencePeriod.end).getFullYear(),
+            avgSampleCount,
+          )}
+        </div>
       </div>
     </aside>
   );

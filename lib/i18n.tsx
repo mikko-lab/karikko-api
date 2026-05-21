@@ -51,6 +51,8 @@ const dict = {
     legend: 'Legend',
     otherStations: 'Other stations',
     noAnomalyData: 'no data',
+    dataFootnote: (startYear: number, endYear: number, avgN: number) =>
+      `Reference period: ${startYear}–${endYear} · ~${avgN} obs/station`,
   },
   fi: {
     title: 'Reaaliaikainen vedenkorkeus-overlay',
@@ -88,6 +90,8 @@ const dict = {
     legend: 'Merkit',
     otherStations: 'Muut asemat',
     noAnomalyData: 'ei dataa',
+    dataFootnote: (startYear: number, endYear: number, avgN: number) =>
+      `Vertailujakso: ${startYear}–${endYear} · ~${avgN} havaintoa/asema`,
   },
 } as const;
 

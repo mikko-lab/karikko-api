@@ -52,6 +52,7 @@
 .demo-shell {
   display: grid;
   grid-template-columns: 1fr var(--sidebar-width);
+  grid-template-rows: 1fr;
   height: 100vh;
   width: 100vw;
 }

@@ -136,6 +136,7 @@ export default function DemoApp({ stations, referencePeriod }: DemoAppProps) {
 
   return (
     <LangProvider>
+      <div className="demo-root">
       <div className="demo-shell">
         <MapView
           stations={stations}
@@ -149,6 +150,7 @@ export default function DemoApp({ stations, referencePeriod }: DemoAppProps) {
           data={selectedAnomaly}
           referencePeriod={referencePeriod}
         />
+      </div>
       </div>
     </LangProvider>
   );

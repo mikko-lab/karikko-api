@@ -49,6 +49,8 @@ const dict = {
     errorStale: 'Latest measurement is older than 72 hours.',
     loading: 'Loading…',
     legend: 'Legend',
+    otherStations: 'Other stations',
+    noAnomalyData: 'no data',
   },
   fi: {
     title: 'Reaaliaikainen vedenkorkeus-overlay',
@@ -84,6 +86,8 @@ const dict = {
     errorStale: 'Tuorein mittaus on yli 72 tuntia vanha.',
     loading: 'Ladataan…',
     legend: 'Merkit',
+    otherStations: 'Muut asemat',
+    noAnomalyData: 'ei dataa',
   },
 } as const;
 
@@ -121,7 +125,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = useCallback(
-    <K extends DictKey>(key: K): Dict[K] => (dict[lang] as Dict)[key],
+    <K extends DictKey>(key: K): Dict[K] => dict[lang][key],
     [lang],
   );
 

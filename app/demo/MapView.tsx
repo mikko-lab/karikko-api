@@ -11,18 +11,31 @@ import type {
   ErrorPayload,
 } from './DemoApp';
 
-// M = Merikarttasarjat (kaikki sarjat yhdistetty, kattaa 19–31°E koko Suomi)
-// V = Veneilykartat (Saimaa-alue 26–29°E), A = Saimaa+Itämeri 24–29°E
-const CHART_TILE_URL = '/api/v1/chart-tile?z={z}&x={x}&y={y}&layer=M';
+/** "Saimaa, Lauritsala" → "Lauritsala" markerin pikkulabeliin. */
+function shortLabel(name: string): string {
+  const i = name.indexOf(',');
+  if (i < 0) return name;
+  return name.substring(i + 1).trim();
+}
+
+/** Hae aseman näyttökoordinaatit: override jos olemassa, muuten SYKE:n omat. */
+function displayCoords(s: DemoStation): { lat: number; lon: number } {
+  const o = STATION_DISPLAY_OVERRIDES[s.stationId];
+  return { lat: o?.lat ?? s.latitude, lon: o?.lon ?? s.longitude };
+}
+
+// Karikko-api proxaa Traficomin WMTS:n. Layer F = sisävedet.
+// Muuta layer-parametria jos haluat eri kerroksen:
+//   A = rannikko+saaristo, C = rannikko, F/G = sisävedet
+const CHART_TILE_URL = '/api/v1/chart-tile?z={z}&x={x}&y={y}&layer=F';
 
 // OSM taustakerroksena, jotta maa-alueet ja paikannimet näkyvät myös
 // niillä alueilla joita Traficom-kerros ei kata.
 const OSM_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
 // Suomi-keskitetty näkymä, joka näyttää kaikki demo-asemat
-// Lauritsala (Saimaa) — ensimmäinen demo-asema, anomalia näkyy heti
-const INITIAL_CENTER: [number, number] = [28.18, 61.05];
-const INITIAL_ZOOM = 8;
+const INITIAL_CENTER: [number, number] = [27.0, 62.5];
+const INITIAL_ZOOM = 5.4;
 
 interface MapViewProps {
   stations: DemoStation[];
@@ -108,7 +121,21 @@ export default function MapView({
       'top-right',
     );
 
-    map.once('load', () => map.resize());
+    // Päivitä data-low-zoom-attribuutti zoom-tason mukaan.
+    // CSS käyttää tätä piilottamaan marker-labelit country-tasolla
+    // jossa ne menisivät päällekkäin Saimaan kolmen aseman välillä.
+    const updateZoomClass = () => {
+      const z = map.getZoom();
+      const container = containerRef.current;
+      if (!container) return;
+      if (z < 7) {
+        container.setAttribute('data-low-zoom', 'true');
+      } else {
+        container.removeAttribute('data-low-zoom');
+      }
+    };
+    map.on('zoom', updateZoomClass);
+    map.once('load', updateZoomClass);
 
     // Klikkaus muualla kuin markerin päällä
     map.on('click', (e) => {
@@ -146,16 +173,34 @@ export default function MapView({
         onStationSelect(s.stationId);
       });
 
-      // Käytä display-overridea jos olemassa, muuten SYKE:n koordinaatit
-      const override = STATION_DISPLAY_OVERRIDES[s.stationId];
-      const displayLat = override?.lat ?? s.latitude;
-      const displayLon = override?.lon ?? s.longitude;
+      // Pikkulabel markerin alle
+      const label = document.createElement('span');
+      label.className = 'demo-marker__label';
+      label.textContent = shortLabel(s.name);
+      el.appendChild(label);
 
+      const { lat, lon } = displayCoords(s);
       const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
-        .setLngLat([displayLon, displayLat])
+        .setLngLat([lon, lat])
         .addTo(map);
 
       markersRef.current.set(s.stationId, { marker, el });
+    }
+
+    // Fit-to-bounds: keskitä kartta niin että kaikki markerit mahtuvat
+    // ruutuun riippumatta selainikkunan koosta. maxZoom estää
+    // yli-zoomauksen jos asemia olisi vähän tai lähekkäin.
+    if (stations.length > 0) {
+      const bounds = new maplibregl.LngLatBounds();
+      for (const s of stations) {
+        const { lat, lon } = displayCoords(s);
+        bounds.extend([lon, lat]);
+      }
+      map.fitBounds(bounds, {
+        padding: { top: 60, bottom: 60, left: 60, right: 60 },
+        duration: 0,
+        maxZoom: 6.5,
+      });
     }
   }, [stations, onStationSelect]);
 
@@ -181,6 +226,24 @@ export default function MapView({
       }
     });
   }, [selectedId]);
+
+  // Pan kartta valittuun asemaan kun selectedId muuttuu.
+  // Säilyttää käyttäjän nykyisen zoomin jos hän on jo zoomannut sisään;
+  // muuten zoomaa kohtuulliseen lake-mittakaavaan (8).
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || selectedId == null) return;
+    const station = stations.find((s) => s.stationId === selectedId);
+    if (!station) return;
+    const { lat, lon } = displayCoords(station);
+    const currentZoom = map.getZoom();
+    const targetZoom = currentZoom < 7 ? 8 : currentZoom;
+    map.easeTo({
+      center: [lon, lat],
+      zoom: targetZoom,
+      duration: 800,
+    });
+  }, [selectedId, stations]);
 
   return (
     <div className="demo-map">

@@ -8,9 +8,13 @@ import type {
 } from './DemoApp';
 
 interface SidebarProps {
+  stations: DemoStation[];
+  anomalies: Map<number, DepthRealtimeData | ErrorPayload>;
+  selectedId: number | null;
   station: DemoStation | null;
   data: DepthRealtimeData | ErrorPayload | null;
   referencePeriod: { start: string; end: string };
+  onStationSelect: (stationId: number) => void;
 }
 
 function LangSwitcher() {
@@ -152,10 +156,92 @@ function levelLabelKey(level: DepthRealtimeData['level']) {
   }
 }
 
+/** "Saimaa, Lauritsala" → "Lauritsala". Säilyttää koko nimen jos pilkkua ei ole. */
+function shortLabel(name: string): string {
+  const i = name.indexOf(',');
+  if (i < 0) return name;
+  return name.substring(i + 1).trim();
+}
+
+/** Formatoi anomalia kompaktiin muotoon listaan: "−66 cm", "+8 cm", "0 cm". */
+function formatAnomalyShort(cm: number): string {
+  if (cm === 0) return '0 cm';
+  const sign = cm > 0 ? '+' : '−';
+  return `${sign}${Math.abs(cm)} cm`;
+}
+
+function StationList({
+  stations,
+  anomalies,
+  selectedId,
+  onSelect,
+}: {
+  stations: DemoStation[];
+  anomalies: Map<number, DepthRealtimeData | ErrorPayload>;
+  selectedId: number | null;
+  onSelect: (id: number) => void;
+}) {
+  const { t } = useLang();
+
+  // Ryhmittele alueittain, säilytä asemien alkuperäinen järjestys
+  const groups = new Map<string, DemoStation[]>();
+  for (const s of stations) {
+    const list = groups.get(s.region) ?? [];
+    list.push(s);
+    groups.set(s.region, list);
+  }
+
+  return (
+    <div className="station-list">
+      <div className="station-list__heading">{t('otherStations')}</div>
+      {Array.from(groups.entries()).map(([region, regionStations]) => (
+        <div key={region} className="station-list__group">
+          <div className="station-list__group-header">{region}</div>
+          {regionStations.map((s) => {
+            const a = anomalies.get(s.stationId);
+            const ok = a && !('error' in a) ? a : null;
+            const hasError = a && 'error' in a;
+            const isSelected = s.stationId === selectedId;
+            return (
+              <button
+                key={s.stationId}
+                type="button"
+                className="station-list__item"
+                data-selected={isSelected}
+                onClick={() => onSelect(s.stationId)}
+                aria-pressed={isSelected}
+              >
+                <span
+                  className="station-list__dot"
+                  data-level={ok?.level ?? undefined}
+                />
+                <span className="station-list__name">
+                  {shortLabel(s.name)}
+                </span>
+                <span className="station-list__anomaly">
+                  {ok
+                    ? formatAnomalyShort(ok.anomalyCm)
+                    : hasError
+                      ? t('noAnomalyData')
+                      : '—'}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Sidebar({
+  stations,
+  anomalies,
+  selectedId,
   station,
   data,
   referencePeriod,
+  onStationSelect,
 }: SidebarProps) {
   const { t, lang } = useLang();
 
@@ -277,6 +363,14 @@ export default function Sidebar({
           </div>
         </div>
       )}
+
+      {/* Station list — navigator for other stations */}
+      <StationList
+        stations={stations}
+        anomalies={anomalies}
+        selectedId={selectedId}
+        onSelect={onStationSelect}
+      />
 
       {/* Error states */}
       {errorData && (

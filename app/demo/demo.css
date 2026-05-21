@@ -3,7 +3,6 @@
    ============================================================ */
 
 .demo-root {
-  height: 100%;
   /* Color tokens */
   --color-bg: #0a1628;
   --color-bg-deep: #050d18;
@@ -14,7 +13,7 @@
 
   --color-fg: #e6edf6;
   --color-fg-muted: #8ba3c1;
-  --color-fg-dim: #7a9ab8;
+  --color-fg-dim: #5c779a;
 
   --color-paper: #f4ecd8;
 
@@ -52,7 +51,6 @@
 .demo-shell {
   display: grid;
   grid-template-columns: 1fr var(--sidebar-width);
-  grid-template-rows: 1fr;
   height: 100vh;
   width: 100vw;
 }
@@ -139,13 +137,11 @@
 .demo-map {
   position: relative;
   background: var(--color-bg-deep);
-  min-height: 0;
 }
 
 .demo-map__canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
+  position: absolute;
+  inset: 0;
 }
 
 .demo-map__legend {
@@ -237,6 +233,37 @@
   color: inherit;
   animation: pulse 1.6s ease-out infinite;
   pointer-events: none;
+}
+
+/* Marker label — pikkuteksti aseman tunnistamiseen */
+.demo-marker__label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 6px;
+  font-family: var(--type-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-paper);
+  white-space: nowrap;
+  pointer-events: none;
+  /* Tripla text-shadow luo halon, joka pitää tekstin luettavana
+     sekä kartan vaalealla paperilla että OSM:n tummalla taustalla. */
+  text-shadow:
+    0 0 3px var(--color-bg-deep),
+    0 0 3px var(--color-bg-deep),
+    0 0 4px var(--color-bg-deep),
+    0 1px 2px rgba(0, 0, 0, 0.8);
+  user-select: none;
+  transition: opacity 200ms ease;
+}
+
+/* Country-tasolla labelit menisivät päällekkäin Saimaan klusterissa.
+   Piilota ne — sidebar-lista on tällöin navigaattori. */
+.demo-map__canvas[data-low-zoom='true'] .demo-marker__label {
+  opacity: 0;
 }
 
 @keyframes pulse {
@@ -527,6 +554,111 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+/* ============================================================
+   Station list — navigator for other stations
+   ============================================================ */
+
+.station-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.station-list__heading {
+  font-family: var(--type-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-fg-dim);
+}
+
+.station-list__group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.station-list__group-header {
+  font-family: var(--type-display);
+  font-style: italic;
+  font-size: 12px;
+  color: var(--color-fg-muted);
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--color-line-soft);
+}
+
+.station-list__item {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 2px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--color-fg);
+  transition: background 120ms ease;
+}
+
+.station-list__item:hover {
+  background: var(--color-surface-2);
+}
+
+.station-list__item[data-selected='true'] {
+  background: var(--color-surface-2);
+  box-shadow: inset 2px 0 0 var(--color-paper);
+}
+
+.station-list__item:focus-visible {
+  outline: 1px solid var(--color-paper);
+  outline-offset: 1px;
+}
+
+.station-list__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-neutral);
+  flex-shrink: 0;
+}
+
+.station-list__dot[data-level='below_p10'] {
+  background: var(--color-below-p10);
+}
+.station-list__dot[data-level='p10_to_p50'] {
+  background: var(--color-p10-p50);
+}
+.station-list__dot[data-level='p50_to_p90'] {
+  background: var(--color-p50-p90);
+}
+.station-list__dot[data-level='above_p90'] {
+  background: var(--color-above-p90);
+}
+
+.station-list__name {
+  font-family: var(--type-body);
+  font-size: 13px;
+  color: var(--color-fg);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.station-list__anomaly {
+  font-family: var(--type-mono);
+  font-size: 12px;
+  color: var(--color-fg-muted);
+  letter-spacing: -0.01em;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 /* Disclaimer */

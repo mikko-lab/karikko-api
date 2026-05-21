@@ -1,11 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import dynamic from 'next/dynamic';
 import { LangProvider } from '@/lib/i18n';
+import MapView from './MapView';
 import Sidebar from './Sidebar';
-
-const MapView = dynamic(() => import('./MapView'), { ssr: false });
 
 export interface DemoStation {
   stationId: number;
@@ -136,7 +134,6 @@ export default function DemoApp({ stations, referencePeriod }: DemoAppProps) {
 
   return (
     <LangProvider>
-      <div className="demo-root">
       <div className="demo-shell">
         <MapView
           stations={stations}
@@ -146,11 +143,14 @@ export default function DemoApp({ stations, referencePeriod }: DemoAppProps) {
           onMapClick={handleMapClick}
         />
         <Sidebar
+          stations={stations}
+          anomalies={anomalies}
+          selectedId={selectedId}
           station={selectedStation}
           data={selectedAnomaly}
           referencePeriod={referencePeriod}
+          onStationSelect={handleStationSelect}
         />
-      </div>
       </div>
     </LangProvider>
   );

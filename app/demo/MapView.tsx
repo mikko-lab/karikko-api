@@ -10,18 +10,18 @@ import type {
   ErrorPayload,
 } from './DemoApp';
 
-// Karikko-api proxaa Traficomin WMTS:n. Layer F = sisävedet.
-// Muuta layer-parametria jos haluat eri kerroksen:
-//   A = rannikko+saaristo, C = rannikko, F/G = sisävedet
-const CHART_TILE_URL = '/api/v1/chart-tile?z={z}&x={x}&y={y}&layer=F';
+// M = Merikarttasarjat (kaikki sarjat yhdistetty, kattaa 19–31°E koko Suomi)
+// V = Veneilykartat (Saimaa-alue 26–29°E), A = Saimaa+Itämeri 24–29°E
+const CHART_TILE_URL = '/api/v1/chart-tile?z={z}&x={x}&y={y}&layer=M';
 
 // OSM taustakerroksena, jotta maa-alueet ja paikannimet näkyvät myös
 // niillä alueilla joita Traficom-kerros ei kata.
 const OSM_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
 // Suomi-keskitetty näkymä, joka näyttää kaikki demo-asemat
-const INITIAL_CENTER: [number, number] = [27.0, 62.5];
-const INITIAL_ZOOM = 5.4;
+// Lauritsala (Saimaa) — ensimmäinen demo-asema, anomalia näkyy heti
+const INITIAL_CENTER: [number, number] = [28.18, 61.05];
+const INITIAL_ZOOM = 8;
 
 interface MapViewProps {
   stations: DemoStation[];

@@ -7,17 +7,20 @@ const TRAFICOM_BASE = 'https://julkinen.traficom.fi/rasteripalvelu/wmts/rest';
 const USER_AGENT = 'Karikko/1.0 (kontakti@example.fi)';
 
 const ALLOWED_LAYERS: Record<string, string> = {
-  'A': 'Traficom:Merikarttasarja A public',
-  'C': 'Traficom:Merikarttasarja C public',
-  'F': 'Traficom:Merikarttasarja F public',
-  'G': 'Traficom:Merikarttasarja G public',
+  'A': 'Traficom:Merikarttasarja A public',      // 24–29°E (Saimaa + Itämeri)
+  'C': 'Traficom:Merikarttasarja C public',      // 19–21°E (lounainen rannikko)
+  'F': 'Traficom:Merikarttasarja F public',      // 20–24°E (länsirannikon sisäsaaristo)
+  'G': 'Traficom:Merikarttasarja G public',      // 23–26°E (Saaristomeri)
+  'M': 'Traficom:Merikarttasarjat public',       // 19–31°E (kaikki sarjat yhdistetty)
+  'V': 'Traficom:Veneilykartat public',          // 26–29°E (veneilykartat, Saimaa)
+  'R': 'Traficom:Rannikkokartat public',         // 19–28°E (rannikkokartat)
 };
 
 const querySchema = z.object({
   z: z.coerce.number().int().min(0).max(18),
   x: z.coerce.number().int().min(0),
   y: z.coerce.number().int().min(0),
-  layer: z.enum(['A', 'C', 'F', 'G']).default('A'),
+  layer: z.enum(['A', 'C', 'F', 'G', 'M', 'V', 'R']).default('M'),
 });
 
 export async function GET(req: NextRequest): Promise<NextResponse> {

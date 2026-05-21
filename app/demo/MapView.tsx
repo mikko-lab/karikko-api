@@ -24,10 +24,9 @@ function displayCoords(s: DemoStation): { lat: number; lon: number } {
   return { lat: o?.lat ?? s.latitude, lon: o?.lon ?? s.longitude };
 }
 
-// Karikko-api proxaa Traficomin WMTS:n. Layer F = sisävedet.
-// Muuta layer-parametria jos haluat eri kerroksen:
-//   A = rannikko+saaristo, C = rannikko, F/G = sisävedet
-const CHART_TILE_URL = '/api/v1/chart-tile?z={z}&x={x}&y={y}&layer=F';
+// M = Merikarttasarjat (kaikki sarjat, 19–31°E) — ainoa layer joka kattaa
+// sekä Saimaan (28°E) että rannikon. A kattaa Saimaan mutta ei länsirantaa.
+const CHART_TILE_URL = '/api/v1/chart-tile?z={z}&x={x}&y={y}&layer=M';
 
 // OSM taustakerroksena, jotta maa-alueet ja paikannimet näkyvät myös
 // niillä alueilla joita Traficom-kerros ei kata.

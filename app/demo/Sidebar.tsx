@@ -279,6 +279,14 @@ export default function Sidebar({
         <p className="intro__lede">{t('intro')}</p>
       </div>
 
+      {/* Station list — navigator, always visible */}
+      <StationList
+        stations={stations}
+        anomalies={anomalies}
+        selectedId={selectedId}
+        onSelect={onStationSelect}
+      />
+
       <hr className="divider" />
 
       {/* Station name */}
@@ -363,14 +371,6 @@ export default function Sidebar({
           </div>
         </div>
       )}
-
-      {/* Station list — navigator for other stations */}
-      <StationList
-        stations={stations}
-        anomalies={anomalies}
-        selectedId={selectedId}
-        onSelect={onStationSelect}
-      />
 
       {/* Error states */}
       {errorData && (

@@ -107,6 +107,8 @@ export default function MapView({
       'top-right',
     );
 
+    map.once('load', () => map.resize());
+
     // Klikkaus muualla kuin markerin päällä
     map.on('click', (e) => {
       // MapLibre triggeröi markerklikkauksen erikseen markerin omasta

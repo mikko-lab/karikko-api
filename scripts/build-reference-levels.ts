@@ -46,7 +46,6 @@ const DEMO_STATIONS: ReadonlyArray<{ nameContains: string; region: string }> = [
   { nameContains: 'Pielinen, Ahveninen', region: 'Pielinen' },
   // Päijänne
   { nameContains: 'Päijänne, pohj', region: 'Päijänne' },
-  { nameContains: 'Päijänne, Padasjoki', region: 'Päijänne' },
 ];
 
 const OUTPUT_PATH = path.join(process.cwd(), 'lib', 'reference-levels.json');

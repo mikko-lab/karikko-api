@@ -21,6 +21,9 @@ export const STATION_DISPLAY_OVERRIDES: Record<
   // Lauritsala (1900) — sensori kanavan suulla, siirretty Suuri-Saimaan avovedelle
   1900: { lat: 61.22, lon: 28.20, note: 'Suuri-Saimaa' },
 
-  // Oravi (1889) — sensori Oravin kanavan luukulla, siirretty Haukivedelle
-  1889: { lat: 62.22, lon: 28.57, note: 'Haukivesi' },
+  // Oravi (1889) — sensori Oravin kanavan luukulla, siirretty Oraviveden avovedelle
+  1889: { lat: 62.18, lon: 28.38, note: 'Oravivesi' },
+
+  // Päijänne pohj. (1998) — sensori itärannalla, siirretty järven keskiosaan
+  1998: { lat: 62.20, lon: 25.73, note: 'Päijänne pohjoinen' },
 };

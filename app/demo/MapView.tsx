@@ -92,10 +92,11 @@ export default function MapView({
             type: 'raster',
             source: 'osm',
             paint: {
-              'raster-saturation': -0.6,
-              'raster-brightness-max': 0.7,
-              'raster-brightness-min': 0.05,
-              'raster-contrast': 0.15,
+              'raster-saturation': -1,
+              'raster-brightness-max': 0.42,
+              'raster-brightness-min': 0.02,
+              'raster-contrast': 0,
+              'raster-opacity': 0.38,
             },
           },
           {
@@ -103,7 +104,7 @@ export default function MapView({
             type: 'raster',
             source: 'traficom',
             paint: {
-              'raster-opacity': 0.9,
+              'raster-opacity': 0.93,
             },
           },
         ],

@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import maplibregl, { type Map as MapLibreMap, type Marker } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useLang } from '@/lib/i18n';
+import { STATION_DISPLAY_OVERRIDES } from './station-display';
 import type {
   DemoStation,
   DepthRealtimeData,
@@ -145,8 +146,13 @@ export default function MapView({
         onStationSelect(s.stationId);
       });
 
+      // Käytä display-overridea jos olemassa, muuten SYKE:n koordinaatit
+      const override = STATION_DISPLAY_OVERRIDES[s.stationId];
+      const displayLat = override?.lat ?? s.latitude;
+      const displayLon = override?.lon ?? s.longitude;
+
       const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
-        .setLngLat([s.longitude, s.latitude])
+        .setLngLat([displayLon, displayLat])
         .addTo(map);
 
       markersRef.current.set(s.stationId, { marker, el });

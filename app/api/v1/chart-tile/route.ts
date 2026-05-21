@@ -7,13 +7,16 @@ const TRAFICOM_BASE = 'https://julkinen.traficom.fi/rasteripalvelu/wmts/rest';
 const USER_AGENT = 'Karikko/1.0 (kontakti@example.fi)';
 
 const ALLOWED_LAYERS: Record<string, string> = {
-  'A': 'Traficom:Merikarttasarja A public',      // 24–29°E (Saimaa + Itämeri)
+  // Rannikkokartat (merikartta = sea chart)
+  'A': 'Traficom:Merikarttasarja A public',      // 24–29°E (rannikko + Saimaan eteläosa)
   'C': 'Traficom:Merikarttasarja C public',      // 19–21°E (lounainen rannikko)
   'F': 'Traficom:Merikarttasarja F public',      // 20–24°E (länsirannikon sisäsaaristo)
   'G': 'Traficom:Merikarttasarja G public',      // 23–26°E (Saaristomeri)
-  'M': 'Traficom:Merikarttasarjat public',       // 19–31°E (kaikki sarjat yhdistetty)
-  'V': 'Traficom:Veneilykartat public',          // 26–29°E (veneilykartat, Saimaa)
   'R': 'Traficom:Rannikkokartat public',         // 19–28°E (rannikkokartat)
+  // Sisävesikartat (inland waterway charts)
+  'V': 'Traficom:Veneilykartat public',          // 26–29°E (sisävesikartat, Saimaa-alue)
+  // Yhdistetty: rannikko + sisävedet — ainoa layer joka kattaa kaikki demo-asemat
+  'M': 'Traficom:Merikarttasarjat public',       // 19–31°E (kaikki sarjat yhdistetty)
 };
 
 const querySchema = z.object({

@@ -1,9 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { LangProvider } from '@/lib/i18n';
-import MapView from './MapView';
 import Sidebar from './Sidebar';
+
+const MapView = dynamic(() => import('./MapView'), { ssr: false });
 
 export interface DemoStation {
   stationId: number;

@@ -125,7 +125,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = useCallback(
-    <K extends DictKey>(key: K): Dict[K] => dict[lang][key],
+    <K extends DictKey>(key: K): Dict[K] => (dict[lang] as Dict)[key],
     [lang],
   );
 

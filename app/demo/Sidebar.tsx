@@ -258,7 +258,7 @@ export default function Sidebar({
       <div className="sidebar-top">
         <div className="demo-brand">
           <div className="demo-brand__mark">
-            Karikko <em>· overlay</em>
+            Nordic Marine Data <em>· overlay</em>
           </div>
         </div>
         <LangSwitcher />

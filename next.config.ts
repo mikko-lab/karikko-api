@@ -1,13 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  async redirects() {
+  async rewrites() {
     return [
       {
         source: "/",
         has: [{ type: "host", value: "demo.nordicmarinedata.com" }],
         destination: "/demo",
-        permanent: false,
       },
     ];
   },

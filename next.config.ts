@@ -5,7 +5,6 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/",
-        has: [{ type: "host", value: "demo.nordicmarinedata.com" }],
         destination: "/demo",
       },
     ];
